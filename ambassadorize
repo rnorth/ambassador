@@ -1,0 +1,3 @@
+#!/bin/sh
+
+socat TCP4-LISTEN:$SERVICE_PORT,fork,reuseaddr TCP4:$SERVICE_NAME:$SERVICE_PORT
