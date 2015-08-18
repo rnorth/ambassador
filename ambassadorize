@@ -1,3 +1,26 @@
 #!/bin/sh
 
-socat TCP4-LISTEN:$SERVICE_PORT,fork,reuseaddr TCP4:$SERVICE_NAME:$SERVICE_PORT
+cat <<EOF > /haproxy.cfg
+global
+    log         127.0.0.1 local2
+
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+
+defaults
+    log                     global
+
+listen ${SERVICE_NAME} :${SERVICE_PORT}
+	mode tcp
+	option tcplog
+	timeout connect 10s
+	timeout client 10s
+	timeout server 10s
+
+	server ${SERVICE_NAME} ${SERVICE_NAME}:${SERVICE_PORT}
+EOF
+
+haproxy -f /haproxy.cfg
